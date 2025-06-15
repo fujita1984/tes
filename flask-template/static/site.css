@@ -1,0 +1,252 @@
+.navbar {
+    background-color: lightslategray;
+    font-size: 1em;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: white;
+    padding: 8px 5px 8px 5px;
+}
+
+.navbar a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navbar-brand {
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.navbar-item {
+    font-variant: small-caps;
+    margin-left: 30px;
+}
+
+.body-content {
+    padding: 5px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.word.card-fixed {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2em;
+    gap: 4em;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.word.selected {
+    background: #cce5ff;
+}
+
+.word.wrong {
+    background: #ff6666;
+    color: #fff;
+    border-color: #ff6666;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2em;
+}
+
+.column {
+    margin: 0 2em;
+}
+
+.word {
+    cursor: pointer;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    margin-bottom: 0.5em;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.word.selected {
+    background: #cce5ff;
+}
+
+#clear-msg {
+    color: green;
+    font-size: 1.5em;
+    text-align: center;
+    margin-top: 2em;
+}
+
+.lang-btn {
+    margin: 0.5em;
+    padding: 0.7em 1.5em;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid #888;
+    background: #f0f0f0;
+    cursor: pointer;
+}
+
+.lang-btn:hover {
+    background: #e0e0e0;
+}
+
+.word.card-fixed {
+    min-height: 2.5em;
+    height: 4em;
+    display: flex;
+}
+
+#score-area {
+    background-color: #f0f8ff;
+    /* 薄い青背景（好みに応じて変更可） */
+    border: 2px solid #add8e6;
+    /* 青系の枠線 */
+    border-radius: 16px;
+    /* 角丸 */
+    padding: 1.5em;
+    /* 内側余白 */
+    max-width: 400px;
+    /* 幅制限 */
+    margin: 2em auto;
+    /* 上下中央に配置 */
+    text-align: center;
+    /* 中央寄せ */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* 軽い影 */
+    font-size: 1.1em;
+}
+
+#score-area {
+    background-color: #f0f8ff;
+    /* 薄い青背景（好みに応じて変更可） */
+    border: 2px solid #add8e6;
+    /* 青系の枠線 */
+    border-radius: 16px;
+    /* 角丸 */
+    padding: 1.5em;
+    /* 内側余白 */
+    max-width: 400px;
+    /* 幅制限 */
+    margin: 2em auto;
+    /* 上下中央に配置 */
+    text-align: center;
+    /* 中央寄せ */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* 軽い影 */
+    font-size: 1.1em;
+}
+
+.lang-btn {
+    display: inline-block;
+    width: 9em;
+    text-align: center;
+    padding: 0.5em;
+    margin: 0.25em;
+    box-sizing: border-box;
+}
+
+#game-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #ccc;
+    border-radius: 16px;
+    padding: 1.5em;
+    margin-top: 2em;
+    background-color: #dde8f8;
+    text-align: center;
+    gap: 1.5em;
+        margin-left: auto;   /* 追加 */
+    margin-right: auto;  /* 追加 */
+    max-width: 480px;
+    position: relative;
+    min-height: 480px;
+}
+
+.card-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3em;
+    justify-items: center;
+    align-items: start;
+    margin: 0 auto;
+}
+
+.game-section {
+    font-size: 1.2em;
+}
+
+#countdown-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 16px;
+}
+#countdown-number {
+    font-size: 5em;
+    font-weight: bold;
+    color: #3366cc;
+    text-shadow: 2px 2px 8px #fff;
+}
+#game-area {
+    position: relative;
+    min-height: 480px;
+}
+
+@media (max-width: 600px) {
+  #game-area {
+    max-width: 98vw;
+    min-width: 0;
+    padding: 0.5em;
+  }
+  /* .card-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    width: 100%;
+  } */
+  .column {
+    margin: 0;
+    width: 100%;
+  }
+  .word.card-fixed {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 1em;
+  }
+}
+.word.card-fixed {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  margin-left: auto;
+  margin-right: auto;
+  /* 中央寄せ */
+}

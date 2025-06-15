@@ -1,0 +1,6 @@
+flask
+SQLAlchemy
+pymysql
+gtts
+tqdm
+python-dotenv
