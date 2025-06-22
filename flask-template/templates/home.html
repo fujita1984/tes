@@ -1,5 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Games {% endblock %}</h1>
+    <h1>{% block title %} HOME {% endblock %}</h1>
+    <a href="{{ url_for('game') }}" class="navbar-item">Word-Karuta</a>
+    /<a href="{{ url_for('memo_it_exam') }}" class="navbar-item">memo-it-exam</a>
+    <hr>
+    <div style="text-align:center;">
+        <a href="https://x.com/5eVAGOZt6B69912" target="_blank" class="profile-link" style="margin:0 1em;">X（Twitter）</a>
+        <a href="https://github.com/fujita1984" target="_blank" class="profile-link" style="margin:0 1em;">GitHub</a>
+    </div>
 {% endblock %}

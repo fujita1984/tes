@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 class Categories(Base):
-    __tablename__ = 'caategories'
+    __tablename__ = 'categories' 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(Unicode(100), nullable=False)
     words = relationship('Words', back_populates='category')
@@ -16,12 +16,5 @@ class Words(Base):
     english = Column(Unicode(100), nullable=False)
     japanese = Column(Unicode(100), nullable=False)
     chinese = Column(Unicode(100), nullable=False)
-    category_id = Column(Integer, ForeignKey('caategories.id'))
+    category_id = Column(Integer, ForeignKey('categories.id'))  
     category = relationship('Categories', back_populates='words')
-
-class Phrases(Base):
-    __tablename__ = 'phrases'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    english = Column(Unicode(100), nullable=False)
-    japanese = Column(Unicode(100), nullable=False)
-    chinese = Column(Unicode(100), nullable=False)

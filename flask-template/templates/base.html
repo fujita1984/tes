@@ -7,16 +7,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
 
-    <body>
-
+    <body class ="container">
         <div class="body-content">
             {% block content %}
             {% endblock %}
-            <hr/>
-        <div class="navbar">
-            <a href="{{ url_for('game') }}" class="navbar-item">Word-Match</a>
-        </div>
-
         </div>
     </body>
 </html>

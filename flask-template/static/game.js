@@ -12,39 +12,209 @@ let comboCount = 0;
 let maxCombo = 0;
 let startTime = null;
 let timerInterval = null;
-const timeLimit = 20; // 秒
+const timeLimit = 0;
 
 const startArea = document.getElementById('start-area');
 const gameArea = document.getElementById('game-area');
 const timerArea = document.getElementById('timer-area');
 const scoreArea = document.getElementById('score-area');
 
-// ゲーム種別
-let gameType = ''; // 'word' or 'phrase'
+let questionCount = null; 
+let customTimeLimit = null; 
+let selectedCategory = 'ALL';
 
-// 単語・フレーズの言語ペア
 const wordLangPairs = [
-    { label: '日本語：英語', left: 'japanese', right: 'english' },
-    { label: '日本語：中国語', left: 'japanese', right: 'chinese' },
-    { label: '英語：中国語', left: 'english', right: 'chinese' },
-];
-const phraseLangPairs = [
-    { label: '日本語：英語', left: 'japanese', right: 'english' },
-    { label: '日本語：中国語', left: 'japanese', right: 'chinese' },
-    { label: '英語：中国語', left: 'english', right: 'chinese' },
+    { label: 'Japanese：English', left: 'japanese', right: 'english' },
+    { label: 'Japanese：Chinese', left: 'japanese', right: 'chinese' },
+    { label: 'English：Chinese', left: 'english', right: 'chinese' },
 ];
 
-function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
+// クッキー操作関数
+function setCookie(name, value, days = 365) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/`;
+}
+function getCookie(name) {
+    const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? decodeURIComponent(v[2]) : null;
 }
 
-function shuffleIndex(n) {
-    let arr = Array.from({ length: n }, (_, i) => i);
-    shuffle(arr);
-    return arr;
+window.onload = () => {
+    fetch('/api/word_categories')
+        .then(res => res.json())
+        .then(categories => {
+            createLangButtons(categories);
+            gameArea.style.display = 'none';
+            timerArea.style.display = 'none';
+            scoreArea.style.display = 'none';
+        });
+};
+
+function createLangButtons(categories) {
+    startArea.innerHTML = '';
+    startArea.style.display = '';
+
+    // クッキーから前回値取得
+    const lastCategory = getCookie('category') || 'ALL';
+    const lastQCount = getCookie('qcount') || '10';
+    const lastTime = getCookie('timelimit') || '';
+
+    const catDiv = document.createElement('div');
+    catDiv.className = 'input-row';
+    catDiv.style.margin = '0.5em 0';
+    catDiv.innerHTML = '<label>Category：</label>';
+    const catSelect = document.createElement('select');
+    catSelect.id = 'category-select';
+    const allOpt = document.createElement('option');
+    allOpt.value = 'ALL';
+    allOpt.textContent = 'ALL';
+    catSelect.appendChild(allOpt);
+    (categories || []).forEach(val => {
+        if (val && val !== true && val !== false) {
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = val;
+            catSelect.appendChild(opt);
+        }
+    });
+    catSelect.value = lastCategory;
+    catSelect.onchange = e => {
+        selectedCategory = e.target.value;
+        setCookie('category', selectedCategory);
+    };
+    catDiv.appendChild(catSelect);
+    startArea.appendChild(catDiv);
+
+    const qCountDiv = document.createElement('div');
+    qCountDiv.className = 'input-row';
+    qCountDiv.style.margin = '0.5em 0';
+    qCountDiv.innerHTML = '<label>Number of questions：</label>';
+    const qCountSelect = document.createElement('select');
+    [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].forEach(val => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        qCountSelect.appendChild(opt);
+    });
+    qCountSelect.value = lastQCount;
+    qCountSelect.id = 'q-count-select';
+    qCountSelect.onchange = e => {
+        setCookie('qcount', e.target.value);
+    };
+    qCountDiv.appendChild(qCountSelect);
+    startArea.appendChild(qCountDiv);
+
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'input-row';
+    timeDiv.style.margin = '0.5em 0';
+    timeDiv.innerHTML = '<label>Time limit (seconds)：</label>';
+    const timeInput = document.createElement('input');
+    timeInput.type = 'number';
+    timeInput.min = 1;
+    timeInput.style.width = '5em';
+    timeInput.id = 'time-limit-input';
+    timeInput.value = lastTime;
+    timeInput.onchange = e => {
+        setCookie('timelimit', e.target.value);
+    };
+    timeDiv.appendChild(timeInput);
+    startArea.appendChild(timeDiv);
+
+    const wordTitle = document.createElement('div');
+    wordTitle.style.margin = '1em 0 0.5em 0';
+    wordTitle.style.fontWeight = 'bold';
+    startArea.appendChild(wordTitle);
+    startArea.appendChild(createGameButtons(wordLangPairs));
+
+}
+
+function createGameButtons(langPairs) {
+    const btnArea = document.createElement('div');
+    langPairs.forEach(pair => {
+        const btn = document.createElement('button');
+        btn.textContent = pair.label;
+        btn.className = 'lang-btn';
+        btn.onclick = () => {
+            leftLang = pair.left;
+            rightLang = pair.right;
+            const qCountVal = document.getElementById('q-count-select').value;
+            questionCount = parseInt(qCountVal);
+            if (isNaN(questionCount) || questionCount < 1 || questionCount > 100) questionCount = 10;
+            const timeVal = document.getElementById('time-limit-input').value;
+            customTimeLimit = timeVal ? parseInt(timeVal) : null;
+            selectedCategory = document.getElementById('category-select').value;
+            startArea.style.display = 'none';
+            gameArea.style.display = '';
+            document.getElementById('left-col').innerHTML = '';
+            document.getElementById('right-col').innerHTML = '';
+            document.getElementById('progress-area').textContent = '';
+            timerArea.style.display = 'none';
+            scoreArea.style.display = 'none';
+            let overlay = document.createElement('div');
+            overlay.id = 'countdown-overlay';
+            overlay.innerHTML = '<span id="countdown-number"></span>';
+            gameArea.appendChild(overlay);
+            let count = 3;
+            document.getElementById('countdown-number').textContent = count;
+            const countdown = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    document.getElementById('countdown-number').textContent = count;
+                } else {
+                    clearInterval(countdown);
+                    overlay.remove();
+                    timerArea.style.display = '';
+                    startGame();
+                }
+            }, 1000);
+        };
+        btnArea.appendChild(btn);
+    });
+    return btnArea;
+}
+
+function startGame() {
+    let apiUrl = `/api/words?limit=${encodeURIComponent(questionCount)}&category=${encodeURIComponent(selectedCategory)}`
+
+    fetch(apiUrl).then(res => res.json()).then(words => {
+        allWords = words;
+        remainWords = [...allWords];
+        shownWords = [];
+        correctCount = 0;
+        wrongCount = 0;
+        comboCount = 0;
+        maxCombo = 0;
+        startTime = Date.now();
+        renderWords.order1 = null;
+        renderWords.order2 = null;
+        gameArea.style.display = '';
+        scoreArea.style.display = 'none';
+        startTimer();
+        showNextWords();
+    });
+}
+
+function startTimer() {
+    let limit = customTimeLimit ? customTimeLimit : null;
+    if (!limit) {
+        timerArea.style.display = 'none';
+        timerInterval = null;
+        return;
+    }
+    let remaining = limit;
+    timerArea.style.display = '';
+    timerArea.textContent = `${remaining} sec`;
+    timerInterval = setInterval(() => {
+        remaining = limit - Math.floor((Date.now() - startTime) / 1000);
+        if (remaining <= 0) {
+            timerArea.textContent = `0 sec`;
+            clearInterval(timerInterval);
+            endGame(false);
+        } else {
+            timerArea.textContent = `${remaining} sec`;
+        }
+    }, 200);
 }
 
 function showNextWords() {
@@ -63,15 +233,29 @@ function showNextWords() {
     renderWords();
 }
 
-function playAudio(id, gameType, lang) {
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
+function shuffleIndex(n) {
+    let arr = Array.from({ length: n }, (_, i) => i);
+    shuffle(arr);
+    return arr;
+}
+
+
+
+function playAudio(id,lang) {
     if (lang !== 'japanese') {
-        // Use absolute path assuming Flask serves static files from /static/audio/
-        const audioPath = `/static/audio/${gameType}/${lang}/${id}.mp3`;
+        const audioPath = `/static/audio/${lang}/${id}.mp3`;
         const audio = new Audio(audioPath);
         audio.play().catch(e => console.error("再生エラー:", e));
     }
 }
-// 汎用的に列をレンダリング
+
 function renderColumn(containerId, langCode, orderArr, selectFunc) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -89,7 +273,7 @@ function renderColumn(containerId, langCode, orderArr, selectFunc) {
             div.textContent = val || '(なし)';
             div.style.visibility = 'visible';
             div.onclick = () => {
-                playAudio(id,gameType, langCode);
+                playAudio(id, langCode);
                 selectFunc(id, div);
             };
         } else {
@@ -108,14 +292,12 @@ function renderWords() {
         renderWords.order2 = shuffleIndex(shownWords.length);
     }
 
-    // 左列、右列に好きな言語とID・選択関数を渡す
     renderColumn('left-col', leftLang, renderWords.order1, selectLeft);
     renderColumn('right-col', rightLang, renderWords.order2, selectRight);
     const total = allWords.length;
     document.getElementById('progress-area').textContent = `${correctCount} / ${total}`;
 }
 
-// 選択時処理も汎用化（必要なら書き換えてください）
 function selectLeft(id, elem) {
     document.querySelectorAll('#left-col .word').forEach(e => e.classList.remove('selected'));
     elem.classList.add('selected');
@@ -170,126 +352,22 @@ function checkMatch() {
     }
 }
 
-function createGameButtons(langPairs, type) {
-    const btnArea = document.createElement('div');
-    langPairs.forEach(pair => {
-        const btn = document.createElement('button');
-        btn.textContent = pair.label;
-        btn.className = 'lang-btn';
-        btn.onclick = () => {
-            leftLang = pair.left;
-            rightLang = pair.right;
-            gameType = type;
-            startArea.style.display = 'none';
-            gameArea.style.display = '';
-            document.getElementById('left-col').innerHTML = '';
-            document.getElementById('right-col').innerHTML = '';
-            document.getElementById('progress-area').textContent = '';
-            timerArea.style.display = 'none';
-            scoreArea.style.display = 'none';
-            // カウントダウンオーバーレイ生成
-            let overlay = document.createElement('div');
-            overlay.id = 'countdown-overlay';
-            overlay.innerHTML = '<span id="countdown-number"></span>';
-            gameArea.appendChild(overlay);
-            let count = 3;
-            document.getElementById('countdown-number').textContent = count;
-            const countdown = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    document.getElementById('countdown-number').textContent = count;
-                } else {
-                    clearInterval(countdown);
-                    overlay.remove();
-                    timerArea.style.display = '';
-                    startGame();
-                }
-            }, 1000);
-        };
-        btnArea.appendChild(btn);
-    });
-    return btnArea;
-}
 
-function createLangButtons() {
-    startArea.innerHTML = '';
-    startArea.style.display = '';
-    // 単語ボタン
-    const wordTitle = document.createElement('div');
-    wordTitle.textContent = '単語';
-    wordTitle.style.margin = '1em 0 0.5em 0';
-    wordTitle.style.fontWeight = 'bold';
-    startArea.appendChild(wordTitle);
-    startArea.appendChild(createGameButtons(wordLangPairs, 'words'));
-    // フレーズボタン
-    const phraseTitle = document.createElement('div');
-    phraseTitle.textContent = 'フレーズ';
-    phraseTitle.style.margin = '1em 0 0.5em 0';
-    phraseTitle.style.fontWeight = 'bold';
-    startArea.appendChild(phraseTitle);
-    startArea.appendChild(createGameButtons(phraseLangPairs, 'phrases'));
-}
-
-function startGame() {
-    let apiUrl = gameType === 'words' ? '/api/words' : '/api/phrases';
-    fetch(apiUrl).then(res => res.json()).then(words => {
-        allWords = words;
-        remainWords = [...allWords];
-        shownWords = [];
-        correctCount = 0;
-        wrongCount = 0;
-        comboCount = 0;
-        maxCombo = 0;
-        startTime = Date.now();
-        renderWords.order1 = null;
-        renderWords.order2 = null;
-        gameArea.style.display = '';
-        scoreArea.style.display = 'none';
-        startTimer();
-        showNextWords();
-    });
-}
-
-function startTimer() {
-    let remaining = timeLimit;
-    timerArea.style.display = '';
-    timerArea.textContent = `残り時間：${remaining} 秒`;
-    timerInterval = setInterval(() => {
-        remaining = timeLimit - Math.floor((Date.now() - startTime) / 1000);
-        if (remaining <= 0) {
-            timerArea.textContent = `残り時間：0 秒`;
-            clearInterval(timerInterval);
-            endGame(false);
-        } else {
-            timerArea.textContent = `残り時間：${remaining} 秒`;
-        }
-    }, 200);
-}
 
 function endGame(success) {
     clearInterval(timerInterval);
     timerArea.style.display = 'none';
     gameArea.style.display = 'none';
 
-    let elapsed = Math.floor((Date.now() - startTime) / 1000);
-    let scoreText = `<h3>結果</h3>`;
-    if (success) {
-        scoreText += `<p>🎉 クリアタイム：${elapsed} 秒</p>`;
-    } else {
-        scoreText += `<p>⌛ タイムオーバー</p>`;
-    }
-    scoreText += `<p>✅ 正解数：${correctCount}</p>`;
-    scoreText += `<p>❌ 誤答数：${wrongCount}</p>`;
-    scoreText += `<p>🔥 最大コンボ：${maxCombo}</p>`;
+    let elapsed = success ? Math.floor((Date.now() - startTime) / 1000) : timeLimit; ;
+    let scoreText = `<h3 style="margin-top: 5px;margin-bottom: 5px;">RESULT</h3>`;
+    scoreText += `<table id="result-table" style="margin-left:auto; margin-right:auto;">`;
+    scoreText += `<tr><th style="text-align:right;">Time：</th><td style="text-align:left;"> ${elapsed}</td></tr>`;
+    scoreText += `<tr><th style="text-align:right;">Correct：</th><td style="text-align:left;"> ${correctCount}</td></tr>`;
+    scoreText += `<tr><th style="text-align:right;">Wrong：</th><td style="text-align:left;"> ${wrongCount}</td></tr>`;
+    scoreText += `<tr><th style="text-align:right;">Max Combo：</th><td style="text-align:left;"> ${maxCombo}</td></tr>`;
+    scoreText += `</table>`;
     scoreArea.innerHTML = scoreText;
     scoreArea.style.display = '';
 
 }
-
-
-window.onload = () => {
-    createLangButtons();
-    gameArea.style.display = 'none';
-    timerArea.style.display = 'none';
-    scoreArea.style.display = 'none';
-};

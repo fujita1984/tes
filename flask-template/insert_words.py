@@ -3,7 +3,7 @@ from models import Words, Categories
 
 # カテゴリ例
 categories = [
-    "Food", "Animal", "Color", "Everyday Items", "Nature"
+    "Food", "Animal", "Color", "Everyday Items", "Nature", "IT exam"
 ]
 
 # カテゴリを作成
@@ -104,7 +104,38 @@ words_data = [
     ("river", "川", "河", 5),
     ("sea", "海", "海", 5),
     ("grass", "草", "草", 5),
-    ("stone", "石", "石头", 5)
+    ("stone", "石", "石头", 5),
+
+    # 情報試験 (6)
+    ("credential", "認証情報", "凭证", 6),
+    ("authentication", "認証（本人確認）", "身份验证", 6),
+    ("authorization", "認可", "授权", 6),
+    ("identity", "身元", "身份", 6),
+    ("certificate", "証明書", "证书", 6),
+    ("vulnerability", "脆弱性", "漏洞", 6),
+    ("exploit", "攻撃", "攻击", 6),
+    ("signature", "署名", "签名", 6),
+    ("revocation", "失効", "吊销", 6),
+    ("strict", "厳密な", "严格", 6),
+    ("statement", "声明", "声明", 6),
+    ("verification", "検証", "验证", 6),
+    ("authority", "権限", "权限", 6),
+    ("registration", "登録", "注册", 6),
+    ("assertion", "主張", "断言", 6),
+    ("foundation", "基盤", "基础", 6),
+    ("transport", "転送", "传输", 6),
+    ("certification", "第三者認証", "认证", 6),
+    ("enhance", "強化する", "增强", 6),
+    ("grant", "付与", "授予", 6),
+    ("auth", "認証", "认证", 6),
+    ("detection", "検出", "检测", 6),
+    ("intrusion", "侵入", "入侵", 6),
+    ("prevention", "防止", "防止", 6),
+    ("redundancy", "冗長性", "冗余", 6),
+    ("maturity", "成熟", "成熟", 6),
+    ("avoidance", "回避", "避免", 6),
+    ("proposal", "提案", "提议", 6),
+    ("accept", "同意", "接受", 6)
 ]
 
 def insert_words(session):
@@ -119,4 +150,4 @@ if __name__ == "__main__":
     insert_categories(session)
     insert_words(session)
     session.close()
-    print("カテゴリと単語50件を投入しました。")
+    print("カテゴリと単語を投入しました。")
