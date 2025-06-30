@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>情報試験メモ</title>
+    <title>情報技術者試験メモ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -59,22 +59,25 @@
 
 <body>
     <div class="container">
-        <h1>情報試験メモ</h1>
-        <p>情報試験午前問題によく出る事柄のメモとか</p>
+        <h1>情報技術者試験のメモ</h1>
 
         <div class="section">
-            <h2>全般</h2>
-            <h3>デジタル署名とMAC</h3>
+            <h2>言葉や意味が似ている用語</h2>
+            <h3>認証、認可</h3>
             <ul>
-                <li>デジタル署名⇒公開鍵、改ざん検知、否認防止可</li>
+                <li>認証⇒ユーザーの正当性を確認、誰かを確認</li>
+                <li>認可⇒ユーザーの権限を確認、何を許可されているかを確認</li>
+            </ul>
+            <h3>デジタル署名、MAC</h3>
+            <ul>
+                <li>デジタル署名⇒公開鍵と秘密鍵、改ざん検知、否認防止可</li>
                 <li>MAC⇒共通鍵、改ざん検知、否認防止不可</li>
             </ul>
-            <h3>フォールスネガティブとフォールスポジティブ</h3>
+            <h3>フォールスネガティブ、フォールスポジティブ</h3>
             <ul>
-                <li>フォールスポジティブ⇒存在しない脅威を検出する</li>
-                <li>フォールスネガティブ⇒存在する脅威を見逃す</li>
+                <li>フォールスポジティブ⇒存在しない脅威を検出する、誤検出</li>
+                <li>フォールスネガティブ⇒存在する脅威を見逃す、見逃し</li>
             </ul>
-
             <h3>フェール、フール、フォール</h3>
             <ul>
                 <li>フェールセーフ⇒安全終了</li>
@@ -82,25 +85,38 @@
                 <li>フールプルーフ⇒誤操作防止</li>
                 <li>フォールアボイダンス⇒障害回避</li>
             </ul>
-
-            <h3>CSMA/CAとCSMA/CD</h3>
+            <h3>CSMA/CA、CSMA/CD</h3>
             <ul>
                 <li>CSMA/CA⇒無線、衝突回避</li>
-                <li>CSMA/   CD⇒有線、衝突再送</li>
+                <li>CSMA/CD⇒有線、衝突検出再送</li>
             </ul>
 
-            <h3>ARPとRARP</h3>
+            <h3>ARP、RARP</h3>
             <ul>
                 <li>ARP⇒IPアドレスからMACアドレスを取得</li>
                 <li>RARP⇒MACアドレスからIPアドレスを取得</li>
             </ul>
-
-            <h3>IDSとIPS</h3>
+            <h3>IDS、IPS</h3>
             <ul>
                 <li>IDS⇒侵入検知(D=>Detection)</li>
                 <li>IPS⇒侵入防止(P=>Prevention)</li>
             </ul>
-
+            <h3>周波数2.4GHz、5GHz</h3>
+            <ul>
+                <li>2.4GHz⇒障害物に強いが電子レンジ等の干渉を受けやすい</li>
+                <li>5GHz⇒高速だが障害物に弱い</li>
+            </ul>
+            <h3>SMTP、POP、IMAP</h3>
+            <ul>
+                <li>SMTP⇒メール送信</li>
+                <li>POP⇒メール受信（ダウンロード型）</li>
+                <li>IMAP⇒メール受信（サーバー管理型）</li>
+            </ul>
+            <h3>NAT、NAPT</h3>
+            <ul>
+                <li>NAT⇒1対1</li>
+                <li>NAPT⇒1対多、port番号も変換</li>
+            </ul>
         </div>
 
         <div class="section">
@@ -112,13 +128,39 @@
                 <li>DMARC⇒SPF+DKIM 問題がある場合の処理方法を決める</li>
             </ul>
             <h3>SMTP-AUTH</h3>
-            <p>メール送信者が正規ユーザーであるかを認証する仕組み。ユーザ名とパスワードを使用して認証を行う。送信者の正当性を確認する。587ポートを使用する。</p>
+            <p>メール送信者が正規ユーザーであるかを認証する仕組み。ユーザ名とパスワードを使用して認証を行う。送信者の正当性を確認する。587、又は465ポートを使用する。</p>
             <h3>SPF (Sender Policy Framework)</h3>
             <p>送信元IPがそのドメインの正規な送信元かを確認する。DNSに記述されたIPと照合。</p>
             <h3>DKIM (DomainKeys Identified Mail)</h3>
             <p>メールに送信ドメインの署名を付け、改ざんされていないか確認する。メールにデジタル署名を付与する。</p>
             <h3>DMARC (Domain-based Message Authentication, Reporting & Conformance)</h3>
             <p>SPFやDKIMの結果をもとに、受信側がどう扱うかのポリシー（拒否・隔離・許可）を定める。</p>
+        </div>
+        <div class="section">
+            <h2>Wifi/IEEE802関係</h2>
+            <h3>アクセスポイント</h3>
+            <p>無線LANの接続機器</p>
+            <h3>SSID</h3>
+            <p>無線LANのネットワーク名</p>
+            <h3>Radiusサーバ</h3>
+            <p>認証・認可・アカウンティング（AAA）。接続可否を判定する。</p>
+            <h3>サプリカント</h3>
+            <p>802.1X認証を行うためのクライアントソフトウェア、アクセスポイントに接続要求を出す。</p>
+            <h3>オーセンティケーター</h3>
+            <p>Wi-Fiアクセスポイント等の機器。サプリカントからの認証要求を中継する。</p>
+        </div>
+        <div class="section">
+            <h2>ネットワーク関係</h2>
+            <h3>PPP</h3>
+            <p>Point-to-Point Protocol。2点間通信プロトコル。暗号化に対応。</p>
+            <h3>PPPoE</h3>
+            <p>PPP over Ethernet。イーサネット上でPPPを使用するためのプロトコル。家庭のインターネット接続等で使われる</p>
+            <h3>IPsec</h3>
+            <p>IPパケットの暗号化、認証、改ざん防止を行うためのプロトコル。VPNなどで使用される。</p>
+            <h3>NAT</h3>
+            <p>Network Address Translation。プライベートIPアドレスをグローバルIPアドレスに変換する技術。</p>
+            <h3>NAPT(IPマスカレード)</h3>
+            <p>Network Address Port Translation。NATの一種で、複数のプライベートIPアドレスを1つのグローバルIPアドレスに変換する際に、ポート番号も変換する技術。</p>
         </div>
     </div>
 </body>

@@ -29,7 +29,6 @@ const wordLangPairs = [
     { label: 'English：Chinese', left: 'english', right: 'chinese' },
 ];
 
-// クッキー操作関数
 function setCookie(name, value, days = 365) {
     const d = new Date();
     d.setTime(d.getTime() + (days*24*60*60*1000));
@@ -40,22 +39,62 @@ function getCookie(name) {
     return v ? decodeURIComponent(v[2]) : null;
 }
 
-window.onload = () => {
-    fetch('/api/word_categories')
-        .then(res => res.json())
-        .then(categories => {
-            createLangButtons(categories);
-            gameArea.style.display = 'none';
-            timerArea.style.display = 'none';
-            scoreArea.style.display = 'none';
-        });
+async function fetchWithRetry(url, options = {}, maxRetries = 3, delay = 1000) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`Fetching ${url} (attempt ${attempt}/${maxRetries})`);
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            console.log(`Successfully fetched ${url}`);
+            return response;
+        } catch (error) {
+            console.error(`Attempt ${attempt} failed:`, error);
+            
+            if (attempt === maxRetries) {
+                throw error; 
+            }
+            
+            console.log(`Waiting ${delay}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 1.5;
+        }
+    }
+}
+
+window.onload = async () => {
+    try {
+        const res = await fetchWithRetry('/api/word_categories');
+        const categories = await res.json();
+        
+        createLangButtons(categories);
+        gameArea.style.display = 'none';
+        timerArea.style.display = 'none';
+        scoreArea.style.display = 'none';
+        
+        console.log('Categories loaded successfully:', categories);
+    } catch (error) {
+        console.error('Failed to load categories after all retries:', error);
+        startArea.innerHTML = `
+            <div style="color: red; text-align: center; margin: 2em;">
+                <h3>エラー</h3>
+                <p>カテゴリの読み込みに失敗しました。</p>
+                <p>ネットワーク接続やサーバーの状態を確認してください。</p>
+                <button onclick="location.reload()" style="margin-top: 1em; padding: 0.5em 1em;">
+                    再読み込み
+                </button>
+            </div>
+        `;
+    }
 };
 
 function createLangButtons(categories) {
     startArea.innerHTML = '';
     startArea.style.display = '';
 
-    // クッキーから前回値取得
     const lastCategory = getCookie('category') || 'ALL';
     const lastQCount = getCookie('qcount') || '10';
     const lastTime = getCookie('timelimit') || '';
@@ -174,10 +213,17 @@ function createGameButtons(langPairs) {
     return btnArea;
 }
 
-function startGame() {
-    let apiUrl = `/api/words?limit=${encodeURIComponent(questionCount)}&category=${encodeURIComponent(selectedCategory)}`
-
-    fetch(apiUrl).then(res => res.json()).then(words => {
+async function startGame() {
+    const apiUrl = `/api/words?limit=${encodeURIComponent(questionCount)}&category=${encodeURIComponent(selectedCategory)}`;
+    
+    try {
+        const res = await fetchWithRetry(apiUrl);
+        const words = await res.json();
+        
+        if (!words || words.length === 0) {
+            throw new Error('No words received from server');
+        }
+        
         allWords = words;
         remainWords = [...allWords];
         shownWords = [];
@@ -192,7 +238,20 @@ function startGame() {
         scoreArea.style.display = 'none';
         startTimer();
         showNextWords();
-    });
+        console.log('Game started successfully with', words.length, 'words');
+        
+    } catch (error) {
+        console.error('Error starting game after retries:', error);
+        alert('ゲーム開始時にエラーが発生しました。しばらく待ってから再試行してください。');
+        
+        gameArea.style.display = 'none';
+        startArea.style.display = '';
+        
+        const overlay = document.getElementById('countdown-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
 }
 
 function startTimer() {
