@@ -18,3 +18,12 @@ class Words(Base):
     chinese = Column(Unicode(100), nullable=False)
     category_id = Column(Integer, ForeignKey('categories.id'))  
     category = relationship('Categories', back_populates='words')
+
+class HskWords(Base):
+    __tablename__ = 'hsk_words'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chinese = Column(Unicode(100), nullable=False)
+    pinyin = Column(Unicode(100), nullable=False)
+    pinyin_with_tone = Column(Unicode(100), nullable=False)
+    japanese_meaning = Column(Unicode(200), nullable=False)
+    hsk_level = Column(Integer, nullable=False)

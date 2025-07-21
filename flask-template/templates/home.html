@@ -3,11 +3,13 @@
 {% block content %}
     <h1>{% block title %} HOME {% endblock %}</h1>
     <hr>
-    <p>情報技術者試験攻略</p>
-    <a href="{{ url_for('memo_it_exam') }}" class="navbar-item">用語メモ</a>
+    <p>情報技術者試験</p>
+    <a href="{{ url_for('word') }}" class="navbar-item">用語</a>
     <hr>
     <p>ゲーム</p>    
-    <a href="{{ url_for('game') }}" class="navbar-item">Word-Karuta</a>
+    <a href="{{ url_for('word_karuta') }}" class="navbar-item">単語かるた</a>
+    &nbsp;/&nbsp;
+    <a href="{{ url_for('hsk_type') }}" class="navbar-item">hskタイピング</a>
     <hr>
     <p>リンク</p>
     <div style="text-align:center;">

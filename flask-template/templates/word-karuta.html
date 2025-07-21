@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Word-Karuta</title>
+    <link rel="stylesheet" href="/static/word-karuta.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+
+<body>
+    <h1 style="text-align:center">Word-Karuta</h1>
+    <div id="start-area" style="text-align:center; margin-bottom:2em;"></div>
+    <div id="score-area" style="display:none;text-align:center;"></div>
+    <div id="game-area"  style="display:none;">
+        <div id="timer-area" class="game-section"></div>
+
+        <div class="card-columns">
+            <div id="left-col" class="column"></div>
+            <div id="right-col" class="column"></div>
+        </div>
+
+        <div id="progress-area" class="game-section" style="font-weight: bold;"></div>
+    </div>
+
+    <div id="footer-area" style="text-align:center;">
+        <a style="margin-top:2em; text-align:center;" href="">Select</a> &nbsp;
+        <a style="margin-top:2em; text-align:center;" href="../">Home</a>
+    </div>
+    
+    <div id="loading-indicator" style="display:none; text-align:center; margin-top:2em;">
+        <p>読み込み中...</p>
+    </div>
+    
+    <script src="/static/word-karuta.js"></script>
+</body>
+
+</html>

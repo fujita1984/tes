@@ -4,3 +4,5 @@ pymysql
 gtts
 tqdm
 python-dotenv
+pyodbc
+sqlalchemy[mssql]
