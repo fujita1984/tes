@@ -20,6 +20,8 @@ cd flask-template
 ```
 
 ### 2. 環境変数を設定
+⚠️ **重要:** `.env`ファイルには機密情報が含まれるため、絶対にGitに追跡させないでください。
+
 `.env`ファイルを作成して、データベース接続情報を設定:
 
 ```bash
@@ -32,8 +34,10 @@ nano .env
 DB_HOST=localhost
 DB_NAME=your_database_name
 DB_USER=your_username
-DB_PASSWORD=your_password
+DB_PASSWORD=your_actual_password
 ```
+
+> 📝 `.env`ファイルは`.gitignore`に含まれているため、Gitリポジトリには追跡されません。
 
 ### 3. 必要なパッケージをインストール
 ```bash
@@ -79,7 +83,7 @@ http://your-server-ip:5000
 3. データベースとユーザーが作成されていることを確認
 
 ### CSVファイルが見つからないエラー
-1. `Book1 (5).csv`がプロジェクトルートにあることを確認
+1. `hsk`がプロジェクトルートにあることを確認
 2. ファイル名が正確であることを確認
 
 ### パッケージインストールエラー

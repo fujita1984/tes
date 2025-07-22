@@ -9,7 +9,7 @@ import csv
 from sqlalchemy import create_engine, text
 from db_mysql import create_mysql_engine
 
-def import_hsk_csv(csv_file_path="Book1 (5).csv"):
+def import_hsk_csv(csv_file_path="hsk.csv"):
     """
     CSVファイルからhsk_wordsテーブルにデータをインポートする
     
@@ -88,7 +88,7 @@ def main():
     print("🚀 HSK CSVデータのインポートを開始します...")
     
     # CSVファイルのパスを指定
-    csv_file = "Book1 (5).csv"
+    csv_file = "hsk.csv"
     
     if import_hsk_csv(csv_file):
         print("✅ HSK CSVデータのインポートが完了しました")
