@@ -32,13 +32,14 @@ def import_hsk_csv(csv_file_path="hsk.csv"):
             # データを準備
             data_to_insert = []
             for row in reader:
-                # CSVの列名に基づいてデータを取得
+            # 実際のCSVの列名に基づいてデータを取得
                 data_to_insert.append({
-                    'id': int(row['番号']),
-                    'chinese': row['漢字'],
-                    'pinyin': row['ピンイン'],
-                    'japanese': row['意味'],
-                    'hsk_level': int(row['級'])
+                    'id': int(row['番号']),  # または row['番号'] など実際の列名
+                    'chinese': row['中国語'],  # または row['漢字'] など実際の列名
+                    'pinyin': row['ピンイン1'],  # または row['ピンイン'] など実際の列名
+                    'pinyin_with_tone': row['ピンイン2'],
+                    'japanese': row['日本語'],  # または row['意味'] など実際の列名
+                    'hsk_level': int(row['level'])  # または row['級'] など実際の列名
                 })
             
             print(f"📄 {len(data_to_insert)}件のデータを読み込みました")
@@ -55,8 +56,8 @@ def import_hsk_csv(csv_file_path="hsk.csv"):
                 
                 # データを一括挿入
                 insert_sql = """
-                INSERT INTO hsk_words (id, chinese, pinyin, japanese, hsk_level) 
-                VALUES (:id, :chinese, :pinyin, :japanese, :hsk_level)
+                INSERT INTO hsk_words (id, chinese, pinyin, pinyin_with_tone, japanese_meaning, hsk_level) 
+                VALUES (:id, :chinese, :pinyin, :pinyin_with_tone, :japanese_meaning, :hsk_level)
                 """
                 
                 conn.execute(text(insert_sql), data_to_insert)
@@ -70,7 +71,7 @@ def import_hsk_csv(csv_file_path="hsk.csv"):
                 print(f"📊 テーブル内データ件数: {count}件")
                 
                 # 最初の3件を表示
-                result = conn.execute(text("SELECT id, chinese, pinyin, japanese, hsk_level FROM hsk_words ORDER BY id LIMIT 3"))
+                result = conn.execute(text("SELECT id, chinese, pinyin, japanese_meaning, hsk_level FROM hsk_words ORDER BY id LIMIT 3"))
                 print("\n📋 インポートされたデータ（最初の3件）:")
                 for row in result:
                     print(f"  ID:{row[0]} | {row[1]} | {row[2]} | {row[3]} | レベル{row[4]}")

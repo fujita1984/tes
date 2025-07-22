@@ -16,16 +16,15 @@ def create_hsk_table():
         # MySQLエンジンを作成
         engine = create_mysql_engine()
         
-        # テーブル作成SQL
+        # テーブル作成SQL（models.pyに合わせて修正）
         create_table_sql = """
         CREATE TABLE IF NOT EXISTS hsk_words (
             id INT AUTO_INCREMENT PRIMARY KEY,
             chinese VARCHAR(100) NOT NULL COMMENT '中国語',
-            pinyin VARCHAR(200) NOT NULL COMMENT 'ピンイン',
-            japanese VARCHAR(200) NOT NULL COMMENT '日本語意味',
+            pinyin VARCHAR(100) NOT NULL COMMENT 'ピンイン',
+            pinyin_with_tone VARCHAR(100) NOT NULL COMMENT 'ピンイン（声調記号付き）',
+            japanese_meaning VARCHAR(200) NOT NULL COMMENT '日本語意味',
             hsk_level INT NOT NULL COMMENT 'HSKレベル',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX idx_hsk_level (hsk_level),
             INDEX idx_chinese (chinese),
             INDEX idx_pinyin (pinyin)
