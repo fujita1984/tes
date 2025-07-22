@@ -12,8 +12,219 @@ class HSKTypingGame {
         this.timerInterval = null;
         this.gameActive = false;
         
+        // タイピング音用のAudioContext
+        this.audioContext = null;
+        this.soundEnabled = true;
+        this.chineseAudioEnabled = true;
+        this.expertMode = false;
+        
         this.initializeElements();
         this.setupEventListeners();
+        this.initializeAudio();
+    }
+    
+    initializeAudio() {
+        // Web Audio API を初期化
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.log('Web Audio API はサポートされていません');
+            this.soundEnabled = false;
+        }
+    }
+    
+    playTypingSound(isCorrect = true) {
+        if (!this.soundEnabled || !this.audioContext) return;
+        
+        try {
+            // メカニカルキーボードのようなクリック音を作成
+            this.createMechanicalClickSound(isCorrect);
+            
+        } catch (e) {
+            console.log('音声再生エラー:', e);
+        }
+    }
+    
+    createMechanicalClickSound(isCorrect = true) {
+        // より複雑なメカニカルキーボード音を作成
+        this.createLayeredClickSound(isCorrect);
+    }
+    
+    createLayeredClickSound(isCorrect = true) {
+        const currentTime = this.audioContext.currentTime;
+        
+        // レイヤー1: 高域のクリック音（プラスチック音）
+        this.createClickLayer1(currentTime, isCorrect);
+        
+        // レイヤー2: 中域の機械的音（スプリング音）
+        this.createClickLayer2(currentTime, isCorrect);
+        
+        // レイヤー3: 低域のクリック音（本体の響き）
+        this.createClickLayer3(currentTime, isCorrect);
+    }
+    
+    createClickLayer1(startTime, isCorrect) {
+        // 高域ノイズクリック（プラスチックのカチカチ音）
+        const bufferSize = 2048;
+        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const output = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+            output[i] = (Math.random() * 2 - 1) * 0.5;
+        }
+        
+        // 短いアタックのエンベロープ
+        for (let i = 0; i < bufferSize; i++) {
+            const t = i / bufferSize;
+            const envelope = Math.exp(-15 * t);
+            output[i] *= envelope;
+        }
+        
+        const source = this.audioContext.createBufferSource();
+        source.buffer = buffer;
+        
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(isCorrect ? 4000 : 3000, startTime);
+        filter.Q.setValueAtTime(1.5, startTime);
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.15, startTime);
+        
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.audioContext.destination);
+        
+        source.start(startTime);
+        source.stop(startTime + 0.03);
+    }
+    
+    createClickLayer2(startTime, isCorrect) {
+        // 中域のメタリック音（スプリング音）
+        const oscillator = this.audioContext.createOscillator();
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(isCorrect ? 1200 : 800, startTime);
+        oscillator.frequency.exponentialRampToValueAtTime(isCorrect ? 600 : 400, startTime + 0.02);
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.08, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.04);
+        
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1000, startTime);
+        filter.Q.setValueAtTime(3, startTime);
+        
+        oscillator.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.audioContext.destination);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.04);
+    }
+    
+    createClickLayer3(startTime, isCorrect) {
+        // 低域の響き（キーボード本体の振動）
+        const oscillator = this.audioContext.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(isCorrect ? 150 : 120, startTime);
+        oscillator.frequency.exponentialRampToValueAtTime(isCorrect ? 100 : 80, startTime + 0.06);
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.05, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.06);
+        
+        oscillator.connect(gain);
+        gain.connect(this.audioContext.destination);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.06);
+    }
+    
+    playSuccessSound() {
+        if (!this.soundEnabled || !this.audioContext) return;
+        
+        try {
+            // メカニカルキーボードの成功音（3回のクリック音）
+            const clickTimes = [0, 0.08, 0.16];
+            const frequencies = [3000, 3500, 4000]; // 高めの周波数
+            
+            clickTimes.forEach((time, index) => {
+                setTimeout(() => {
+                    this.createMechanicalSuccessClick(frequencies[index]);
+                }, time * 1000);
+            });
+            
+        } catch (e) {
+            console.log('成功音再生エラー:', e);
+        }
+    }
+    
+    playChineseAudio() {
+        if (!this.currentWord || !this.chineseAudioEnabled) return;
+        
+        try {
+            const audioPath = `/static/hsk/${this.currentWord.id}.mp3`;
+            const audio = new Audio(audioPath);
+            
+            // 音量を調整
+            audio.volume = 0.8;
+            
+            // 問題表示後少し遅延してから再生（読みやすくするため）
+            setTimeout(() => {
+                audio.play().catch(e => {
+                    console.log(`中国語音声再生エラー (ID: ${this.currentWord.id}):`, e);
+                });
+            }, 500); // 500ms後に再生
+            
+        } catch (e) {
+            console.log('中国語音声再生エラー:', e);
+        }
+    }
+    
+    createMechanicalSuccessClick(frequency = 3000) {
+        // 短いホワイトノイズクリック音
+        const bufferSize = 2048;
+        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const output = buffer.getChannelData(0);
+        
+        // ホワイトノイズを生成
+        for (let i = 0; i < bufferSize; i++) {
+            output[i] = (Math.random() * 2 - 1) * 0.3;
+        }
+        
+        // 短いクリック音のエンベロープ
+        for (let i = 0; i < bufferSize; i++) {
+            const progress = i / bufferSize;
+            let envelope;
+            
+            if (progress < 0.1) {
+                envelope = progress / 0.1;
+            } else {
+                envelope = Math.exp(-5 * (progress - 0.1));
+            }
+            
+            output[i] *= envelope;
+        }
+        
+        const source = this.audioContext.createBufferSource();
+        source.buffer = buffer;
+        
+        // 高域フィルター
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+        filter.Q.setValueAtTime(2, this.audioContext.currentTime);
+        
+        const gainNode = this.audioContext.createGain();
+        gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+        
+        source.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        source.start(this.audioContext.currentTime);
+        source.stop(this.audioContext.currentTime + 0.05);
     }
     
     initializeElements() {
@@ -50,6 +261,12 @@ class HSKTypingGame {
         this.resultTime = document.getElementById('result-time');
         this.wrongWordsDiv = document.getElementById('wrong-words');
         this.playAgainBtn = document.getElementById('play-again');
+        
+        // 音声切り替えボタン
+        this.soundToggleBtn = document.getElementById('sound-toggle');
+        
+        // 上級者モードボタン
+        this.expertModeBtn = document.getElementById('expert-mode');
     }
     
     setupEventListeners() {
@@ -59,6 +276,62 @@ class HSKTypingGame {
         this.skipWordBtn.addEventListener('click', () => this.skipCurrentWord());
         this.endGameBtn.addEventListener('click', () => this.endGame());
         this.playAgainBtn.addEventListener('click', () => this.resetGame());
+        this.soundToggleBtn.addEventListener('click', () => this.toggleSound());
+        this.expertModeBtn.addEventListener('click', () => this.toggleExpertMode());
+        
+        // 中国語音声トグルボタンのイベントリスナー
+        const chineseAudioToggle = document.getElementById('chinese-audio-toggle');
+        if (chineseAudioToggle) {
+            chineseAudioToggle.addEventListener('click', () => this.toggleChineseAudio());
+        }
+        
+        // スペースキーでゲーム開始
+        document.addEventListener('keydown', (e) => this.handleGlobalKeydown(e));
+    }
+    
+    handleGlobalKeydown(e) {
+        // ゲーム設定画面でスペースキーが押された場合
+        if (e.code === 'Space' && !this.gameActive && 
+            document.querySelector('.game-settings').style.display !== 'none') {
+            e.preventDefault(); // デフォルトのスペースキー動作を防ぐ
+            this.startGame();
+        }
+    }
+    
+    toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        this.soundToggleBtn.textContent = this.soundEnabled ? 'ON' : 'OFF';
+        this.soundToggleBtn.className = this.soundEnabled ? 'btn-secondary' : 'btn-danger';
+        
+        // AudioContextが停止している場合は再開
+        if (this.soundEnabled && this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    }
+    
+    toggleExpertMode() {
+        this.expertMode = !this.expertMode;
+        this.expertModeBtn.textContent = this.expertMode ? 'ON' : 'OFF';
+        this.expertModeBtn.className = this.expertMode ? 'btn-danger' : 'btn-secondary';
+    }
+    
+    toggleChineseAudio() {
+        this.chineseAudioEnabled = !this.chineseAudioEnabled;
+        const chineseAudioToggle = document.getElementById('chinese-audio-toggle');
+        if (chineseAudioToggle) {
+            chineseAudioToggle.textContent = this.chineseAudioEnabled ? 'ON' : 'OFF';
+            chineseAudioToggle.className = this.chineseAudioEnabled ? 'btn-secondary' : 'btn-danger';
+        }
+    }
+    
+    // 配列をランダムにシャッフルする関数（Fisher-Yatesアルゴリズム）
+    shuffleArray(array) {
+        const shuffled = [...array]; // 配列のコピーを作成
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
     }
     
     async startGame() {
@@ -79,7 +352,8 @@ class HSKTypingGame {
                 return;
             }
             
-            this.words = data;
+            // 単語をランダムにシャッフル
+            this.words = this.shuffleArray(data);
             this.currentWordIndex = 0;
             this.correctCount = 0;
             this.wrongWords = [];
@@ -87,6 +361,8 @@ class HSKTypingGame {
             
             // UI更新
             document.querySelector('.game-settings').style.display = 'none';
+            document.querySelector('.spacebar-instruction').style.display = 'none';
+            this.startGameBtn.style.display = 'none';
             this.gameArea.style.display = 'block';
             this.resultArea.style.display = 'none';
             
@@ -131,14 +407,54 @@ class HSKTypingGame {
         // 入力フィールドをクリア
         this.pinyinInput.value = '';
         this.pinyinInput.className = '';
+        
+        // 新しい単語が表示された時に中国語音声を再生
+        this.playChineseAudio();
+        
+        // 次の単語の音声ファイルをプリロード（スムーズな再生のため）
+        this.preloadNextAudio();
+    }
+    
+    preloadNextAudio() {
+        if (this.currentWordIndex + 1 < this.words.length) {
+            const nextWord = this.words[this.currentWordIndex + 1];
+            try {
+                const audioPath = `/static/hsk/${nextWord.id}.mp3`;
+                const audio = new Audio();
+                audio.preload = 'metadata';
+                audio.src = audioPath;
+            } catch (e) {
+                console.log('次の音声プリロードエラー:', e);
+            }
+        }
     }
     
     updatePinyinDisplay() {
         const targetPinyin = this.currentWord.pinyin.toLowerCase();
-        const completed = targetPinyin.substring(0, this.typedPinyin.length);
-        const current = this.typedPinyin.length < targetPinyin.length ? 
-                       targetPinyin.charAt(this.typedPinyin.length) : '';
-        const remaining = targetPinyin.substring(this.typedPinyin.length + 1);
+        const input = this.pinyinInput.value.toLowerCase().trim();
+        
+        // 上級者モードの場合はピンインを表示しない
+        if (this.expertMode) {
+            this.completedPinyinSpan.textContent = '';
+            this.currentCharSpan.textContent = '';
+            this.remainingPinyinSpan.textContent = '';
+            return;
+        }
+        
+        // 正しく入力された文字数を計算
+        let correctLength = 0;
+        for (let i = 0; i < Math.min(input.length, targetPinyin.length); i++) {
+            if (input[i] === targetPinyin[i]) {
+                correctLength++;
+            } else {
+                break; // 間違った文字が見つかったら停止
+            }
+        }
+        
+        const completed = targetPinyin.substring(0, correctLength);
+        const current = correctLength < targetPinyin.length ? 
+                       targetPinyin.charAt(correctLength) : '';
+        const remaining = targetPinyin.substring(correctLength + 1);
         
         this.completedPinyinSpan.textContent = completed;
         this.currentCharSpan.textContent = current;
@@ -150,8 +466,26 @@ class HSKTypingGame {
         
         const input = e.target.value.toLowerCase().trim();
         const targetPinyin = this.currentWord.pinyin.toLowerCase();
+        const previousLength = this.typedPinyin.length;
         
         this.typedPinyin = input;
+        
+        // 文字が追加された場合にのみ音を再生
+        if (input.length > previousLength) {
+            // 正しく入力された部分の長さを確認
+            let correctLength = 0;
+            for (let i = 0; i < Math.min(input.length, targetPinyin.length); i++) {
+                if (input[i] === targetPinyin[i]) {
+                    correctLength++;
+                } else {
+                    break;
+                }
+            }
+            
+            // 新しく入力された文字が正しいかどうかを判定
+            const isCorrect = correctLength >= previousLength + 1;
+            this.playTypingSound(isCorrect);
+        }
         
         // ピンイン表示を更新
         this.updatePinyinDisplay();
@@ -161,6 +495,7 @@ class HSKTypingGame {
             // 正解
             this.pinyinInput.className = 'correct';
             this.correctCount++;
+            this.playSuccessSound(); // 正解時の特別な音
             this.nextWord();
         } else if (targetPinyin.startsWith(input)) {
             // 途中まで正解
@@ -251,8 +586,7 @@ class HSKTypingGame {
                 `).join('')}
             `;
             this.wrongWordsDiv.innerHTML = wrongWordsHTML;
-        } else {
-            this.wrongWordsDiv.innerHTML = '<h3 style="color: #28a745;">すべて正解でした！🎉</h3>';
+
         }
     }
     
@@ -276,6 +610,8 @@ class HSKTypingGame {
         // UIをリセット
         this.resultArea.style.display = 'none';
         document.querySelector('.game-settings').style.display = 'flex';
+        document.querySelector('.spacebar-instruction').style.display = 'block';
+        this.startGameBtn.style.display = 'block';
         this.pinyinInput.disabled = true;
         this.pinyinInput.value = '';
         this.pinyinInput.className = '';

@@ -141,6 +141,38 @@
     margin-bottom: 0.5em;
 }
 
+/* 設定項目の整列 */
+#start-area .input-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    margin: 0.5em 0 !important;
+    width: 100%;
+    max-width: 350px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+#start-area .input-row label {
+    width: 120px !important;
+    text-align: right !important;
+    margin-right: 10px !important;
+    flex-shrink: 0;
+    font-size: 1.15em;
+    font-weight: bold;
+}
+
+#start-area .input-row select,
+#start-area .input-row input[type="number"] {
+    font-size: 1.15em;
+    padding: 0.2em 0.5em;
+    height: 2.2em;
+    box-sizing: border-box;
+    text-align: left !important;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
 @media (max-width: 600px) {
     #game-area {
     max-width: 90%;

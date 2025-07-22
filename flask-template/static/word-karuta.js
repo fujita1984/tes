@@ -93,9 +93,18 @@ function createLangButtons(categories) {
     const catDiv = document.createElement('div');
     catDiv.className = 'input-row';
     catDiv.style.margin = '0.5em 0';
-    catDiv.innerHTML = '<label>Category：</label>';
+    catDiv.style.display = 'flex';
+    catDiv.style.alignItems = 'center';
+    const catLabel = document.createElement('label');
+    catLabel.textContent = 'カテゴリ：';
+    catLabel.style.width = '120px';
+    catLabel.style.textAlign = 'right';
+    catLabel.style.marginRight = '10px';
+    catDiv.appendChild(catLabel);
+    
     const catSelect = document.createElement('select');
     catSelect.id = 'category-select';
+    catSelect.style.textAlign = 'left';
     const allOpt = document.createElement('option');
     allOpt.value = 'ALL';
     allOpt.textContent = 'ALL';
@@ -119,8 +128,17 @@ function createLangButtons(categories) {
     const qCountDiv = document.createElement('div');
     qCountDiv.className = 'input-row';
     qCountDiv.style.margin = '0.5em 0';
-    qCountDiv.innerHTML = '<label>Number of questions：</label>';
+    qCountDiv.style.display = 'flex';
+    qCountDiv.style.alignItems = 'center';
+    const qCountLabel = document.createElement('label');
+    qCountLabel.textContent = '問題数：';
+    qCountLabel.style.width = '120px';
+    qCountLabel.style.textAlign = 'right';
+    qCountLabel.style.marginRight = '10px';
+    qCountDiv.appendChild(qCountLabel);
+    
     const qCountSelect = document.createElement('select');
+    qCountSelect.style.textAlign = 'left';
     [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].forEach(val => {
         const opt = document.createElement('option');
         opt.value = val;
@@ -138,11 +156,20 @@ function createLangButtons(categories) {
     const timeDiv = document.createElement('div');
     timeDiv.className = 'input-row';
     timeDiv.style.margin = '0.5em 0';
-    timeDiv.innerHTML = '<label>Time limit (seconds)：</label>';
+    timeDiv.style.display = 'flex';
+    timeDiv.style.alignItems = 'center';
+    const timeLabel = document.createElement('label');
+    timeLabel.textContent = '制限時間 (秒)：';
+    timeLabel.style.width = '120px';
+    timeLabel.style.textAlign = 'right';
+    timeLabel.style.marginRight = '10px';
+    timeDiv.appendChild(timeLabel);
+    
     const timeInput = document.createElement('input');
     timeInput.type = 'number';
     timeInput.min = 1;
     timeInput.style.width = '5em';
+    timeInput.style.textAlign = 'left';
     timeInput.id = 'time-limit-input';
     timeInput.value = lastTime;
     timeInput.onchange = e => {

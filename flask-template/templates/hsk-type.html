@@ -16,6 +16,7 @@
                 <label for="hsk-level">HSK レベル:</label>
                 <select id="hsk-level">
                     <option value="1" selected>レベル 1</option>
+                    <option value="2">レベル 2</option>
                 </select>
             </div>
             
@@ -30,7 +31,28 @@
                 </select>
             </div>
             
-            <button id="start-game" class="btn-primary">ゲーム開始</button>
+            <div class="setting-group">
+                <label for="sound-toggle">タイピング音:</label>
+                <button id="sound-toggle" class="btn-secondary">ON</button>
+            </div>
+            
+            <div class="setting-group">
+                <label for="chinese-audio-toggle">中国語音声:</label>
+                <button id="chinese-audio-toggle" class="btn-secondary">ON</button>
+            </div>
+            
+            <div class="setting-group">
+                <label for="expert-mode">上級者モード:</label>
+                <button id="expert-mode" class="btn-secondary">OFF</button>
+            </div>
+        </div>
+        
+        <button id="start-game" class="btn-primary">ゲーム開始</button>
+        
+        <div class="spacebar-instruction">
+            <p>スペースキーを押してもゲームが始まります</p>
+            <p class="typing-note">üはvとして出題しています</p>
+        </div>
         </div>
 
         <div class="game-area" id="game-area" style="display: none;">
