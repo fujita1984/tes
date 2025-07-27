@@ -7,7 +7,7 @@ class HSKTypingGame {
         this.currentWord = null;
         this.typedPinyin = '';
         this.correctCount = 0;
-        this.wrongWords = [];
+        this.skippedWords = []; // wrongWords から skippedWords に変更
         this.startTime = null;
         this.timerInterval = null;
         this.gameActive = false;
@@ -16,7 +16,7 @@ class HSKTypingGame {
         this.audioContext = null;
         this.soundEnabled = true;
         this.chineseAudioEnabled = true;
-        this.expertMode = false;
+        this.pinyinDisplayMode = true;
         
         this.initializeElements();
         this.setupEventListeners();
@@ -265,8 +265,8 @@ class HSKTypingGame {
         // 音声切り替えボタン
         this.soundToggleBtn = document.getElementById('sound-toggle');
         
-        // 上級者モードボタン
-        this.expertModeBtn = document.getElementById('expert-mode');
+        // ピンイン表示ボタン
+        this.pinyinDisplayBtn = document.getElementById('expert-mode');
     }
     
     setupEventListeners() {
@@ -277,7 +277,7 @@ class HSKTypingGame {
         this.endGameBtn.addEventListener('click', () => this.endGame());
         this.playAgainBtn.addEventListener('click', () => this.resetGame());
         this.soundToggleBtn.addEventListener('click', () => this.toggleSound());
-        this.expertModeBtn.addEventListener('click', () => this.toggleExpertMode());
+        this.pinyinDisplayBtn.addEventListener('click', () => this.togglePinyinDisplay());
         
         // 中国語音声トグルボタンのイベントリスナー
         const chineseAudioToggle = document.getElementById('chinese-audio-toggle');
@@ -309,10 +309,15 @@ class HSKTypingGame {
         }
     }
     
-    toggleExpertMode() {
-        this.expertMode = !this.expertMode;
-        this.expertModeBtn.textContent = this.expertMode ? 'ON' : 'OFF';
-        this.expertModeBtn.className = this.expertMode ? 'btn-danger' : 'btn-secondary';
+    togglePinyinDisplay() {
+        this.pinyinDisplayMode = !this.pinyinDisplayMode;
+        this.pinyinDisplayBtn.textContent = this.pinyinDisplayMode ? 'ON' : 'OFF';
+        this.pinyinDisplayBtn.className = this.pinyinDisplayMode ? 'btn-secondary' : 'btn-danger';
+        
+        // スキップボタンの表示/非表示を切り替え（ピンイン非表示時のみスキップボタン表示）
+        if (this.gameActive) {
+            this.skipWordBtn.style.display = !this.pinyinDisplayMode ? 'inline-block' : 'none';
+        }
     }
     
     toggleChineseAudio() {
@@ -356,7 +361,7 @@ class HSKTypingGame {
             this.words = this.shuffleArray(data);
             this.currentWordIndex = 0;
             this.correctCount = 0;
-            this.wrongWords = [];
+            this.skippedWords = []; // wrongWords から skippedWords に変更
             this.gameActive = true;
             
             // UI更新
@@ -369,6 +374,9 @@ class HSKTypingGame {
             this.totalWordsSpan.textContent = this.words.length;
             this.pinyinInput.disabled = false;
             this.pinyinInput.focus();
+            
+            // スキップボタンの表示をピンイン表示モードで制御
+            this.skipWordBtn.style.display = !this.pinyinDisplayMode ? 'inline-block' : 'none';
             
             // タイマー開始
             this.startTime = Date.now();
@@ -433,8 +441,8 @@ class HSKTypingGame {
         const targetPinyin = this.currentWord.pinyin.toLowerCase();
         const input = this.pinyinInput.value.toLowerCase().trim();
         
-        // 上級者モードの場合はピンインを表示しない
-        if (this.expertMode) {
+        // ピンイン非表示モードの場合はピンインを表示しない
+        if (!this.pinyinDisplayMode) {
             this.completedPinyinSpan.textContent = '';
             this.currentCharSpan.textContent = '';
             this.remainingPinyinSpan.textContent = '';
@@ -518,12 +526,15 @@ class HSKTypingGame {
                 return;
             } else {
                 // 不正解の場合
-                this.wrongWords.push({
-                    chinese: this.currentWord.chinese,
-                    pinyin: this.currentWord.pinyin,
-                    japanese_meaning: this.currentWord.japanese_meaning,
-                    userInput: input
-                });
+                // ピンイン非表示モード（旧上級者モード）の場合のみスキップとして記録
+                if (!this.pinyinDisplayMode) {
+                    this.skippedWords.push({
+                        chinese: this.currentWord.chinese,
+                        pinyin: this.currentWord.pinyin,
+                        japanese_meaning: this.currentWord.japanese_meaning,
+                        userInput: input || '未入力'
+                    });
+                }
                 this.nextWord();
             }
         }
@@ -535,9 +546,9 @@ class HSKTypingGame {
     }
     
     skipCurrentWord() {
-        if (!this.gameActive) return;
+        if (!this.gameActive || this.pinyinDisplayMode) return; // ピンイン非表示モード時のみスキップ可能
         
-        this.wrongWords.push({
+        this.skippedWords.push({
             chinese: this.currentWord.chinese,
             pinyin: this.currentWord.pinyin,
             japanese_meaning: this.currentWord.japanese_meaning,
@@ -564,29 +575,51 @@ class HSKTypingGame {
         this.gameArea.style.display = 'none';
         this.resultArea.style.display = 'block';
         
-        const totalWords = this.words.length;
-        const accuracy = totalWords > 0 ? Math.round((this.correctCount / totalWords) * 100) : 0;
+        const skippedCount = this.skippedWords.length;
+        // 実際にプレイした単語数 = 正解数 + スキップ数
+        const actualPlayedWords = this.correctCount + skippedCount;
+        const accuracy = actualPlayedWords > 0 ? Math.round((this.correctCount / actualPlayedWords) * 100) : 0;
         const totalTime = this.startTime ? Date.now() - this.startTime : 0;
         
-        this.resultTotal.textContent = totalWords;
+        // 結果の値を設定
         this.resultCorrect.textContent = this.correctCount;
+        document.getElementById('result-skipped').textContent = skippedCount;
         this.resultAccuracy.textContent = accuracy + '%';
         this.resultTime.textContent = this.formatTime(totalTime);
+        this.resultTotal.textContent = actualPlayedWords;
         
-        // 間違えた単語を表示
-        if (this.wrongWords.length > 0) {
-            const wrongWordsHTML = `
-                <h3>間違えた単語 (${this.wrongWords.length}個)</h3>
-                ${this.wrongWords.map(word => `
+        // 結果表示をピンイン表示モードと非表示モードで分ける
+        if (!this.pinyinDisplayMode) {
+            // ピンイン非表示モード（旧上級者モード）: 全項目表示
+            document.querySelector('.stat-item:nth-child(1)').style.display = 'block'; // 正解数
+            document.querySelector('.stat-item:nth-child(2)').style.display = 'block'; // スキップ数
+            document.querySelector('.stat-item:nth-child(3)').style.display = 'block'; // 正解率
+            document.querySelector('.stat-item:nth-child(4)').style.display = 'block'; // 総時間
+            document.querySelector('.stat-item:nth-child(5)').style.display = 'block'; // 総単語数
+        } else {
+            // ピンイン表示モード（旧通常モード）: 総時間、総単語数のみ表示
+            document.querySelector('.stat-item:nth-child(1)').style.display = 'none'; // 正解数
+            document.querySelector('.stat-item:nth-child(2)').style.display = 'none'; // スキップ数
+            document.querySelector('.stat-item:nth-child(3)').style.display = 'none'; // 正解率
+            document.querySelector('.stat-item:nth-child(4)').style.display = 'block'; // 総時間
+            document.querySelector('.stat-item:nth-child(5)').style.display = 'block'; // 総単語数
+        }
+        
+        // スキップした単語を表示（ピンイン非表示モードのみ）
+        if (!this.pinyinDisplayMode && this.skippedWords.length > 0) {
+            const skippedWordsHTML = `
+                <h3>スキップした単語 (${this.skippedWords.length}個)</h3>
+                ${this.skippedWords.map(word => `
                     <div class="wrong-word-item">
                         <div class="wrong-word-chinese">${word.chinese}</div>
-                        <div class="wrong-word-pinyin">正解: ${word.pinyin} | 入力: ${word.userInput}</div>
+                        <div class="wrong-word-pinyin">正解: ${word.pinyin}${word.userInput !== 'スキップ' ? ` | 入力: ${word.userInput}` : ''}</div>
                         <div class="wrong-word-meaning">${word.japanese_meaning}</div>
                     </div>
                 `).join('')}
             `;
-            this.wrongWordsDiv.innerHTML = wrongWordsHTML;
-
+            this.wrongWordsDiv.innerHTML = skippedWordsHTML;
+        } else {
+            this.wrongWordsDiv.innerHTML = '';
         }
     }
     

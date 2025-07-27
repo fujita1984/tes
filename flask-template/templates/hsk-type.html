@@ -13,15 +13,15 @@
         <h1>タイピング</h1>
         <div class="game-settings">
             <div class="setting-group">
-                <label for="hsk-level">HSK レベル:</label>
+                <label for="hsk-level">HSK レベル</label>
                 <select id="hsk-level">
-                    <option value="1" selected>レベル 1</option>
-                    <option value="2">レベル 2</option>
+                    <option value="1" selected>1級</option>
+                    <option value="2">2級</option>
                 </select>
             </div>
             
             <div class="setting-group">
-                <label for="word-count">単語数:</label>
+                <label for="word-count">単語数</label>
                 <select id="word-count">
                     <option value="5">5個</option>
                     <option value="10" selected>10個</option>
@@ -32,18 +32,18 @@
             </div>
             
             <div class="setting-group">
-                <label for="sound-toggle">タイピング音:</label>
+                <label for="sound-toggle">タイピング音</label>
                 <button id="sound-toggle" class="btn-secondary">ON</button>
             </div>
             
             <div class="setting-group">
-                <label for="chinese-audio-toggle">中国語音声:</label>
+                <label for="chinese-audio-toggle">中国語音声</label>
                 <button id="chinese-audio-toggle" class="btn-secondary">ON</button>
             </div>
             
             <div class="setting-group">
-                <label for="expert-mode">上級者モード:</label>
-                <button id="expert-mode" class="btn-secondary">OFF</button>
+                <label for="expert-mode">ピンイン表示</label>
+                <button id="expert-mode" class="btn-secondary">ON</button>
             </div>
         </div>
         
@@ -62,22 +62,22 @@
             
             <div class="score-board">
                 <div class="score-item">
-                    <span>進行:</span>
+                    <span>進行</span>
                     <span id="current-word">0</span> / <span id="total-words">0</span>
                 </div>
                 <div class="score-item">
-                    <span>正解:</span>
+                    <span>正解</span>
                     <span id="correct-count">0</span>
                 </div>
                 <div class="score-item">
-                    <span>時間:</span>
+                    <span>時間</span>
                     <span id="timer">00:00</span>
                 </div>
             </div>
 
             <div class="word-display">
-                <div class="chinese-word" id="chinese-word">汉字</div>
-                <div class="japanese-meaning" id="japanese-meaning">意味</div>
+                <div class="chinese-word" id="chinese-word"></div>
+                <div class="japanese-meaning" id="japanese-meaning"></div>
                 <div class="pinyin-display" id="pinyin-display">
                     <span id="completed-pinyin"></span>
                     <span id="current-char" class="current-char"></span>
@@ -99,25 +99,28 @@
             <h2>ゲーム結果</h2>
             <div class="result-stats">
                 <div class="stat-item">
-                    <span class="stat-label">総単語数:</span>
-                    <span id="result-total">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">正解数:</span>
+                    <span class="stat-label">正解数</span>
                     <span id="result-correct">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">正解率:</span>
+                    <span class="stat-label">スキップ数</span>
+                    <span id="result-skipped">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">正解率</span>
                     <span id="result-accuracy">0%</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">総時間:</span>
+                    <span class="stat-label">総時間</span>
                     <span id="result-time">00:00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">総単語数</span>
+                    <span id="result-total">0</span>
                 </div>
             </div>
             
             <div class="wrong-words" id="wrong-words">
-                <!-- 間違えた単語一覧 -->
             </div>
             
             <button id="play-again" class="btn-primary">もう一度プレイ</button>
