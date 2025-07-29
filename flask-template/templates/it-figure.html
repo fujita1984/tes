@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='it-figure.css') }}" />
+{% endblock %}
+
+{% block content %}
+    <h1>{% block title %} 図 {% endblock %}</h1>
+    
+    <div class="it-figure-container">
+        <div class="terms-panel">
+            <h3>用語</h3>
+            <div id="terms-list" class="terms-list">
+                <!-- 用語ボタンがここに動的に生成されます -->
+            </div>
+        </div>
+        
+        <div class="figure-panel">
+            <h3>自分の理解</h3>
+            <div id="figure-display" class="figure-display">
+                <p class="no-figure-message">用語を選択すると図が表示されます</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='it-figure.js') }}"></script>
+{% endblock %}

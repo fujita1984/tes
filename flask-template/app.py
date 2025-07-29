@@ -16,13 +16,18 @@ def home():
 @app.route("/word-karuta")
 def word_karuta():
     return render_template("word-karuta.html")
-@app.route("/word")
-def word():
-    return render_template("word.html")
+@app.route("/it-word")
+def it_word():
+    return render_template("it-word.html")
 
 @app.route("/hsk-type")
 def hsk_type():
     return render_template("hsk-type.html")
+
+@app.route("/it-figure")
+def it_figure():
+    return render_template("it-figure.html")
+
 @app.route("/api/word_categories")
 def api_word_categories():
     session, engine = get_mysql_session()
@@ -86,6 +91,34 @@ def api_hsk_words():
                 "hsk_level": w.hsk_level
             } for w in selected
         ])
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+
+@app.route("/api/it_figures")
+def api_it_figures():
+    try:
+        # static/img/itディレクトリから画像ファイル一覧を取得
+        img_dir = os.path.join(app.static_folder, 'img', 'it')
+        if not os.path.exists(img_dir):
+            return jsonify([])
+        
+        # 画像ファイルのみを取得（拡張子チェック）
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
+        figures = []
+        
+        for filename in os.listdir(img_dir):
+            if '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions:
+                # ファイル名から用語名を生成（拡張子を除いて、_を空白に置換）
+                term_name = filename.rsplit('.', 1)[0].replace('_', ' ').replace('-', ' ')
+                figures.append({
+                    'term': term_name,
+                    'filename': filename
+                })
+        
+        # アルファベット順でソート
+        figures.sort(key=lambda x: x['term'].lower())
+        return jsonify(figures)
     except Exception as e:
         import traceback
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
